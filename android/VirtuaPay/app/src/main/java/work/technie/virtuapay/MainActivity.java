@@ -1,13 +1,16 @@
 package work.technie.virtuapay;
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv_account_balance;
@@ -27,8 +30,32 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void payOther(View b) {
-        Intent intent = new Intent(this,ClientPay.class);
-        startActivity(intent);
+        new AlertDialog.Builder(MainActivity.this)
+                .setTitle("Enter amount")
+                .setView(android.R.id.text1)
+                .setNegativeButton("Cancel",null)
+                .setPositiveButton("Pay", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        Intent intent = new Intent(MainActivity.this,ClientPay.class);
+                        String amt = ((TextView)MainActivity.this.findViewById(android.R.id.text1))
+                                .getText().toString().trim();
+                        try {
+                            int amount = Integer.parseInt(amt);
+                            if(amount%10 !=0 )
+                                new RuntimeException("Div by 10 required");
+                            intent.putExtra(ClientPay.INTENT_DATA_AMOUNT_KEY, amount);
+                            startActivity(intent);
+                        }catch (Exception e) {
+                            Toast.makeText(MainActivity.this,
+                                    "Please enter an Integer, which is multiple of 10",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                })
+                .setPositiveButton("Ok",null)
+                .show();
+
     }
 
     @Override
