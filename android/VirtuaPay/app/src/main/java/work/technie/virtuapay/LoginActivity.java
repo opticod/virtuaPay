@@ -334,15 +334,15 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             try {
                 JSONObject jsonObject = new JSONObject(resultJsonStr);
                 String result = jsonObject.getString("status");
-                String name = jsonObject.getString("name");
-                String key = jsonObject.getString("key");
-                final String NAME = "name";
+                final String UID = "uid";
                 final String KEY = "key";
+                String uid = jsonObject.getString(UID);
+                String key = jsonObject.getString(KEY);
 
                 if (result.equals("Login")) {
                     sharedpreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
                     SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putString(NAME, name);
+                    editor.putString(UID, uid);
                     editor.putString(KEY, key);
                     editor.apply();
 
