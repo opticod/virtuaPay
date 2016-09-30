@@ -4,11 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.TargetApi;
 import android.app.LoaderManager.LoaderCallbacks;
-import android.content.Context;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
@@ -25,10 +23,12 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.inputmethod.EditorInfo;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import org.json.JSONException;
@@ -46,16 +46,21 @@ import java.util.List;
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
+ * Created by anupam on 30/9/16.
+ */
+
+
+/**
  * A login screen that offers login via email/password.
  */
-public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
+public class RegisterActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
 
-    public static final String mPREFERENCES = "mPrefs";
+
     /**
      * Id to identity READ_CONTACTS permission request.
      */
     private static final int REQUEST_READ_CONTACTS = 0;
-    public final String LOG_TAG = LoginActivity.class.getSimpleName();
+    public final String LOG_TAG = RegisterActivity.class.getSimpleName();
     /**
      * Keep track of the login task to ensure we can cancel it if requested.
      */
@@ -63,48 +68,74 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
     // UI references.
     private AutoCompleteTextView mEmailView;
+    private AutoCompleteTextView mNameView;
+    private Spinner mSpinnerView;
     private EditText mPasswordView;
+    private EditText mRePasswordView;
     private View mProgressView;
     private View mLoginFormView;
+    private String mSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_login);
+        setContentView(R.layout.activity_logup);
         // Set up the login form.
+
+        mNameView = (AutoCompleteTextView) findViewById(R.id.name);
+
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
+
+
+        mSpinnerView = (Spinner) findViewById(R.id.type);
+        mSpinnerView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                mSelected = String.valueOf(parent.getItemAtPosition(position));
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
 
         mPasswordView = (EditText) findViewById(R.id.password);
         mPasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
                 if (id == R.id.login || id == EditorInfo.IME_NULL) {
-                    attemptLogin();
+                    attemptRegister();
                     return true;
                 }
                 return false;
             }
         });
 
-        Button mEmailSignInButton = (Button) findViewById(R.id.email_sign_in_button);
+        mRePasswordView = (EditText) findViewById(R.id.re_password);
+        mRePasswordView.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+            @Override
+            public boolean onEditorAction(TextView textView, int id, KeyEvent keyEvent) {
+                if (id == R.id.login || id == EditorInfo.IME_NULL) {
+                    attemptRegister();
+                    return true;
+                }
+                return false;
+            }
+        });
+
+        Button mEmailSignInButton = (Button) findViewById(R.id.email_register_button);
         mEmailSignInButton.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View view) {
-                attemptLogin();
+                attemptRegister();
             }
         });
 
         mLoginFormView = findViewById(R.id.login_form);
         mProgressView = findViewById(R.id.login_progress);
-
-        findViewById(R.id.email_sign_up_button).setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent = new Intent(LoginActivity.this, RegisterActivity.class);
-                LoginActivity.this.startActivity(intent);
-            }
-        });
     }
 
     private void populateAutoComplete() {
@@ -156,23 +187,40 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      * If there are form errors (invalid email, missing fields, etc.), the
      * errors are presented and no actual login attempt is made.
      */
-    private void attemptLogin() {
+    private void attemptRegister() {
         if (mAuthTask != null) {
             return;
         }
 
         // Reset errors.
+        mNameView.setError(null);
         mEmailView.setError(null);
         mPasswordView.setError(null);
+        mRePasswordView.setError(null);
 
         // Store values at the time of the login attempt.
+        String name = mNameView.getText().toString();
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
+        String rePassword = mRePasswordView.getText().toString();
+        String type = mSelected;
 
         boolean cancel = false;
         View focusView = null;
 
-        // Check for a valid email address.
+        if (!password.equals(rePassword)) {
+            mPasswordView.setError(getString(R.string.error_password_mismatch));
+            mRePasswordView.setError(getString(R.string.error_password_mismatch));
+            focusView = mPasswordView;
+            cancel = true;
+        }
+
+        if (TextUtils.isEmpty(name)) {
+            mNameView.setError(getString(R.string.error_field_required));
+            focusView = mNameView;
+            cancel = true;
+        }
+
         if (TextUtils.isEmpty(email)) {
             mEmailView.setError(getString(R.string.error_field_required));
             focusView = mEmailView;
@@ -193,6 +241,16 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             cancel = true;
         }
 
+        if (TextUtils.isEmpty(rePassword)) {
+            mRePasswordView.setError(getString(R.string.error_invalid_password));
+            focusView = mRePasswordView;
+            cancel = true;
+        } else if (!isPasswordValid(rePassword)) {
+            mRePasswordView.setError(getString(R.string.error_invalid_password));
+            focusView = mRePasswordView;
+            cancel = true;
+        }
+
 
         if (cancel) {
             // There was an error; don't attempt login and focus the first
@@ -202,7 +260,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(email, password);
+            mAuthTask = new UserLoginTask(name, email, type, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -292,7 +350,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
     private void addEmailsToAutoComplete(List<String> emailAddressCollection) {
         //Create adapter to tell the AutoCompleteTextView what to show in its dropdown list.
         ArrayAdapter<String> adapter =
-                new ArrayAdapter<>(LoginActivity.this,
+                new ArrayAdapter<>(RegisterActivity.this,
                         android.R.layout.simple_dropdown_item_1line, emailAddressCollection);
 
         mEmailView.setAdapter(adapter);
@@ -315,16 +373,19 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private static final String mPREFERENCES = "mPrefs";
+        private final String mName;
         private final String mEmail;
+        private final String mType;
         private final String mPassword;
+
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String resultJsonStr = null;
-        private SharedPreferences sharedpreferences;
 
-        UserLoginTask(String email, String password) {
+        UserLoginTask(String name, String email, String type, String password) {
+            mName = name;
             mEmail = email;
+            mType = type;
             mPassword = password;
         }
 
@@ -334,18 +395,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             try {
                 JSONObject jsonObject = new JSONObject(resultJsonStr);
                 String result = jsonObject.getString("status");
-                String name = jsonObject.getString("name");
-                String key = jsonObject.getString("key");
-                final String NAME = "name";
-                final String KEY = "key";
-
-                if (result.equals("Login")) {
-                    sharedpreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putString(NAME, name);
-                    editor.putString(KEY, key);
-                    editor.apply();
-
+                if (result.equals("true")) {
                     return true;
                 }
                 return false;
@@ -356,18 +406,23 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             return false;
         }
 
+
         @Override
         protected Boolean doInBackground(Void... params) {
 
             boolean result = false;
             try {
-                final String BASE_URL = "http://172.16.8.208/login.php?";
+                final String BASE_URL = "http://172.16.8.208/reg.php?";
                 final String EMAIL_PARAM = "email";
-                final String PASSWORD_PARAM = "pwd";
+                final String PASSWORD_PARAM = "password";
+                final String NAME_PARAM = "name";
+                final String TYPE_PARAM = "type";
 
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(EMAIL_PARAM, mEmail)
                         .appendQueryParameter(PASSWORD_PARAM, mPassword)
+                        .appendQueryParameter(NAME_PARAM, mName)
+                        .appendQueryParameter(TYPE_PARAM, mType)
                         .build();
 
                 URL url = new URL(builtUri.toString());
@@ -419,12 +474,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
             mAuthTask = null;
             showProgress(false);
             if (success) {
-                Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+                Intent intent = new Intent(RegisterActivity.this, LoginActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-                LoginActivity.this.startActivity(intent);
+                RegisterActivity.this.startActivity(intent);
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
-                mPasswordView.requestFocus();
+                mEmailView.setError(getString(R.string.error_email_exist));
+                mEmailView.requestFocus();
             }
         }
 
