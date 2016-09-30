@@ -3,18 +3,18 @@
 //This is for USER's LOGIN
 require('dbConnect.php') ;
 
-$name = null ;
+$email = null ;
 $pwd = null ;
 $type = 0 ;
 
-if( isset($_REQUEST['name']) && !empty($_REQUEST['name'])) {
-	$name = $_REQUEST['name'] ;
+if( isset($_REQUEST['email']) && !empty($_REQUEST['email'])) {
+	$email = $_REQUEST['email'] ;
 	}
 else { 
 	header('Content-type: application/json');
 	$arr = array();
 	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : name';
+	$arr[] = 'Missing parameter in the request : email';
 	echo json_encode($arr);
 	die();
 }
@@ -39,7 +39,7 @@ if (mysqli_connect_errno())
   echo "Failed to connect to MySQL: " . mysqli_connect_error();
   }
 
-$sql = "SELECT * from user_info where name = '$name' and password = '$pwd'" ;
+$sql = "SELECT * from user_info where email_id = '$email' and password = '$pwd'" ;
 if(!($result = mysqli_query($conn,$sql) ) )
 {
 	echo("Error description:1 " . mysqli_error($conn));
@@ -58,9 +58,10 @@ if( $rowcount== 0 ){
 } 
 
 $inf = mysqli_fetch_assoc($result) ;
+$uid = $inf['uid'];
 $key = sha1(base64_encode(openssl_random_pseudo_bytes(100))) ;
 
-$sql = "UPDATE user_info set mykey = '$key' where name = '$name' and password='$pwd'" ;
+$sql = "UPDATE user_info set mykey = '$key' where uid = '$uid'" ;
 
 if(mysqli_query($conn,$sql)) { } 
 else echo("Error description:2 " . mysqli_error($conn));
@@ -71,7 +72,8 @@ mysqli_close($conn);
 header('Content-type: application/json');
 
 $finresult = array() ;
-$finresult[] = $key ;
+$finresult['uid'] = $uid ;
+$finresult['key'] = $key ;
 echo json_encode($finresult);
 
 

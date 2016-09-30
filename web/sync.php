@@ -45,22 +45,32 @@ if (mysqli_connect_errno())
   echo "Failed to connect to MySQL: " . mysqli_connect_error();
   }
 
-$sql = "SELECT * from user_info where uid = '$uid' " ;
+$sql = "SELECT * from user_info where uid = '$uid' and mykey='$mykey' " ;
+
 if(!($result = mysqli_query($conn,$sql) ) )
 {
 	echo("Error description:1 " . mysqli_error($conn));
 	die() ;
 }
-
-$inf = mysqli_fetch_assoc($result) ;
-if( strcmp($inf['mykey'],$mykey)) != 0 ) {
+$rowcount = mysqli_num_rows($result) ;
+if( $rowcount== 0 ){
 	header('Content-type: application/json');
 	$arr = array();
 	$arr[] = -1;
-	$arr[] = 'Sorry, your OTP has either expired or it is wrong.';
+	$arr[] = 'Invalid User';
 	echo json_encode($arr);
 	die();
-}
+} 
+
+$inf = mysqli_fetch_assoc($result) ;
+// if( strcmp($inf['mykey'],$mykey)) != 0 ) {
+// 	header('Content-type: application/json');
+// 	$arr = array();
+// 	$arr[] = -1;
+// 	$arr[] = 'Sorry, your OTP has either expired or it is wrong.';
+// 	echo json_encode($arr);
+// 	die();
+// }
 
 
 
@@ -76,24 +86,26 @@ if ($result=mysqli_query($conn,$sql))
 }
 
 $amnt = 0 ;
+$validnotes = array();
 foreach($finresult as $arr)
 {
-	$sql = "SELECT * from virtual_cash where vcid = '$arr'" ;
+	$sql = "SELECT * from virtual_cash where vcid = '$arr' and isvalid=1" ;
 	if(!($result = mysqli_query($conn,$sql) ) )
-{
-	echo("Error description:1 " . mysqli_error($conn));
-	die() ;
-}
-
-
-    $inf = mysqli_fetch_assoc($result) ;
-	if( $inf["isvalid"] == 1 ) $amnt = $amnt + $inf['amount'] ;
-	mysqli_free_result($result) ;
+	{
+		echo("Error description:1 " . mysqli_error($conn));
+		die() ;
+	} else if(mysqli_num_rows($result)>0){
+		$inf = mysqli_fetch_assoc($result) ;
+		$amnt = $amnt + $inf['amount'];
+		$validnotes[] = $inf['code'];
+	}
 
 }
 
 $ans = array() ;
-$ans = $amnt ;
+$ans['amount'] = $amnt ;
+$ans['validnotes'] = $validnotes  ;
+
 echo json_encode($ans);
 
 

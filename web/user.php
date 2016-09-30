@@ -53,29 +53,6 @@ else {
 }
 
 
-if( isset($_REQUEST['type']) && !empty($_REQUEST['type'])) {
-	
-	if(strcmp ($_REQUEST['type'] , "client" ) == 0 ) { $type = 0 ;} 
-	else if( strcmp($_REQUEST['type'] , "manager") == 0 ) { $type = 1 ; }
-    else {
-	header('Content-type: application/json');
-	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : wrong type';
-	echo json_encode($arr);
-	die();
-}
-
- }
-    else {
-	header('Content-type: application/json');
-	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : type';
-	echo json_encode($arr);
-	die();
-}
-
 $conn = mysqli_connect(SERVER_ADDRESS,USER_NAME,PASSWORD,DATABASE);
 if (mysqli_connect_errno())
   {
@@ -97,7 +74,7 @@ header('Content-type: application/json');
 	mysqli_free_result($result) ;
 }  
 
-$sql = "INSERT INTO user_info(name,email_id,password,type) values('$name','$eid','$pwd','$type')" ;
+$sql = "INSERT INTO user_info(name,email_id,password,type) values('$name','$eid','$pwd',0)" ;
 if(mysqli_query($conn,$sql)) { } 
 else echo("Error description: " . mysqli_error($conn));
 $sql = "SELECT * from user_info where email_id = '$eid'" ;
@@ -113,9 +90,7 @@ mysqli_close($conn);
 header('Content-type: application/json');
 
 $finresult = array() ;
-$finresult[] = $uid ;
-$finresult[] = $name ;
-$finresult[] = $type ;
+$finresult['status'] = true ;
 echo json_encode($finresult);
 ?>
 
