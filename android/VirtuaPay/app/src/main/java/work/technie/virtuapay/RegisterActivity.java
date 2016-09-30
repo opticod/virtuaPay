@@ -74,7 +74,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
     private EditText mRePasswordView;
     private View mProgressView;
     private View mLoginFormView;
-    private String mSelected;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,19 +86,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         mEmailView = (AutoCompleteTextView) findViewById(R.id.email);
         populateAutoComplete();
 
-
-        mSpinnerView = (Spinner) findViewById(R.id.type);
-        mSpinnerView.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                mSelected = String.valueOf(parent.getItemAtPosition(position));
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {
-
-            }
-        });
 
 
         mPasswordView = (EditText) findViewById(R.id.password);
@@ -203,7 +189,6 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
         String email = mEmailView.getText().toString();
         String password = mPasswordView.getText().toString();
         String rePassword = mRePasswordView.getText().toString();
-        String type = mSelected;
 
         boolean cancel = false;
         View focusView = null;
@@ -260,7 +245,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             // Show a progress spinner, and kick off a background task to
             // perform the user login attempt.
             showProgress(true);
-            mAuthTask = new UserLoginTask(name, email, type, password);
+            mAuthTask = new UserLoginTask(name, email, password);
             mAuthTask.execute((Void) null);
         }
     }
@@ -375,17 +360,15 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
         private final String mName;
         private final String mEmail;
-        private final String mType;
         private final String mPassword;
 
         HttpURLConnection urlConnection = null;
         BufferedReader reader = null;
         String resultJsonStr = null;
 
-        UserLoginTask(String name, String email, String type, String password) {
+        UserLoginTask(String name, String email, String password) {
             mName = name;
             mEmail = email;
-            mType = type;
             mPassword = password;
         }
 
@@ -414,15 +397,13 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
             try {
                 final String BASE_URL = "http://172.16.8.208/web/user.php?";
                 final String EMAIL_PARAM = "email";
-                final String PASSWORD_PARAM = "password";
+                final String PASSWORD_PARAM = "pwd";
                 final String NAME_PARAM = "name";
-                final String TYPE_PARAM = "type";
 
                 Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                         .appendQueryParameter(EMAIL_PARAM, mEmail)
                         .appendQueryParameter(PASSWORD_PARAM, mPassword)
                         .appendQueryParameter(NAME_PARAM, mName)
-                        .appendQueryParameter(TYPE_PARAM, mType)
                         .build();
 
                 URL url = new URL(builtUri.toString());

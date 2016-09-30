@@ -65,8 +65,22 @@
                         android:textStyle="italic"
                         android:text="Rs 100"/>
                 </LinearLayout>
+
+
             </LinearLayout>
         </android.support.v7.widget.CardView>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:onClick="payOther"
+            android:text="Pay"/>
+        <Button
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:text="Receive"
+            android:onClick="acceptPay"/>
 
     </LinearLayout>
 </RelativeLayout>

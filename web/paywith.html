@@ -10,18 +10,24 @@
 
   <body>
 
-
+<style type="text/css">
+.mybutton {
+	padding: 0;
+	border: none;
+	background: none;
+}
+</style>
 <form method="post">
 <div class="box">
 <h1>Transaction</h1>
 
-		<input type="text"  placeholder="Userid" required="required" />
-        <input type="number"  placeholder="Amount" required="required" />
+		<input type="text" name="uid" placeholder="Userid" required="required" />
+        <input type="number"  name="amnt" placeholder="Amount" required="required" />
         
   
-<a href="#"><div class="btn">Pay</div></a> 
-<a href="#"><div id="btn2">Withdraw</div></a> 
-<a href="file:///C:/Users/MY%20DELL/Desktop/hack/log.html"><div id="btn3">Logout</div></a> 
+<button type="submit" formaction="pay.php" class='mybutton' ><div class="btn">Pay</div></a> 
+<button type="submit" formaction="withdraw.php" class='mybutton'><div id="btn2">Withdraw</div></a> 
+<button type="submit" formaction="logout.php" class='mybutton'><div id="btn3">Logout</div></a> 
   
 </div> 
   
