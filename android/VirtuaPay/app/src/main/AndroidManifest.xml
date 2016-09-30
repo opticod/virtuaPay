@@ -26,12 +26,12 @@
         </activity>
         <activity
             android:name=".RegisterActivity"
-            android:label="@string/app_name"></activity>
+            android:label="@string/app_name" />
         <activity
             android:name=".MainActivity"
-            android:label="@string/app_name">
-        </activity>
-        <activity android:name=".ManagerAccept"></activity>
+            android:label="@string/app_name"></activity>
+        <activity android:name=".ManagerAccept" />
+        <activity android:name=".ClientPay"></activity>
     </application>
 
 </manifest>

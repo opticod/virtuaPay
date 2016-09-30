@@ -361,7 +361,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             boolean result = false;
             try {
-                final String BASE_URL = "http://172.16.8.208/login.php?";
+                final String BASE_URL = "http://172.16.8.208/web/login.php?";
                 final String EMAIL_PARAM = "email";
                 final String PASSWORD_PARAM = "pwd";
 

@@ -26,6 +26,11 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
+    public void payOther(View b) {
+        Intent intent = new Intent(this,ClientPay.class);
+        startActivity(intent);
+    }
+
     @Override
     protected void onResume() {
         super.onResume();
