@@ -13,8 +13,8 @@ if( isset($_REQUEST['email']) && !empty($_REQUEST['email'])) {
 else { 
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : email';
+	$arr['status'] = 'Error';
+	$arr['message'] = 'Missing parameter in the request : email';
 	echo json_encode($arr);
 	die();
 }
@@ -26,8 +26,8 @@ if( isset($_REQUEST['pwd']) && !empty($_REQUEST['pwd'])) {
 else {
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : pwd';
+	$arr['status'] = 'Error';
+	$arr['message'] = 'Missing parameter in the request : pwd';
 	echo json_encode($arr);
 	die();
 }
@@ -50,8 +50,8 @@ $rowcount = mysqli_num_rows($result) ;
 if( $rowcount== 0 ){
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'No such user';
+	$arr['status'] = 'Error';
+	$arr['message'] = 'No such user';
 	echo json_encode($arr);
 	die();
 	mysqli_free_result($result) ;
@@ -59,6 +59,7 @@ if( $rowcount== 0 ){
 
 $inf = mysqli_fetch_assoc($result) ;
 $uid = $inf['uid'];
+$name = $inf['name'];
 $key = sha1(base64_encode(openssl_random_pseudo_bytes(100))) ;
 
 $sql = "UPDATE user_info set mykey = '$key' where uid = '$uid'" ;
@@ -72,18 +73,14 @@ mysqli_close($conn);
 header('Content-type: application/json');
 
 $finresult = array() ;
+$finresult['status'] = 'Login' ;
 $finresult['uid'] = $uid ;
 $finresult['key'] = $key ;
+$finresult['email'] = $email ;
+$finresult['name'] = $name ;
 echo json_encode($finresult);
 
 
 
 
 ?>
-
-
-
-
-
-
-

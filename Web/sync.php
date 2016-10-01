@@ -12,8 +12,8 @@ if( isset($_REQUEST['uid']) && !empty($_REQUEST['uid'])) {
 else { 
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : uid';
+	$arr['status'] = 'Error';
+	$arr['message'] = 'Missing parameter in the request : uid';
 	echo json_encode($arr);
 	die();
 }
@@ -26,8 +26,8 @@ if( isset($_REQUEST['mykey']) && !empty($_REQUEST['mykey'])) {
 else { 
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Missing parameter in the request : mykey';
+	$arr['status'] = 'Error';
+	$arr['message'] = 'Missing parameter in the request : mykey';
 	echo json_encode($arr);
 	die();
 }
@@ -56,8 +56,8 @@ $rowcount = mysqli_num_rows($result) ;
 if( $rowcount== 0 ){
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Invalid User';
+	$arr['status'] = 'Error';
+	$arr['message'] = 'Invalid User';
 	echo json_encode($arr);
 	die();
 } 
@@ -66,7 +66,7 @@ $inf = mysqli_fetch_assoc($result) ;
 // if( strcmp($inf['mykey'],$mykey)) != 0 ) {
 // 	header('Content-type: application/json');
 // 	$arr = array();
-// 	$arr[] = -1;
+// 	$arr['status'] = 'Error';
 // 	$arr[] = 'Sorry, your OTP has either expired or it is wrong.';
 // 	echo json_encode($arr);
 // 	die();
@@ -103,6 +103,7 @@ foreach($finresult as $arr)
 }
 
 $ans = array() ;
+$ans['status'] = 'success' ;
 $ans['amount'] = $amnt ;
 $ans['validnotes'] = $validnotes  ;
 

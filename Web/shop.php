@@ -5,6 +5,7 @@ require('dbConnect.php') ;
 
 
 $uid = null ;
+$sumtransfer = -1 ;
 $iter = array() ;
 
 if( isset($_REQUEST['uid']) && !empty($_REQUEST['uid'])) {
@@ -13,22 +14,41 @@ if( isset($_REQUEST['uid']) && !empty($_REQUEST['uid'])) {
 else { 
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'The id does not exist';
+	$arr['status'] = 'Failed';
+	$arr['message'] = 'The id does not exist';
 	echo json_encode($arr);
 	die();
 }
 
-if( isset($_REQUEST['notes']) && !empty($_REQUEST['notes'])) {
-	echo $_REQUEST['notes']."<br>";
-	$iter = json_decode($_REQUEST['notes'], true);
-	echo sizeof($iter);
+if( isset($_REQUEST['sumtransfer']) ) {
+	$sumtransfer = intval($_REQUEST['sumtransfer']) ;
 	}
 else { 
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'The notes are not received correctly';
+	$arr['status'] = 'Failed';
+	$arr['message'] = 'The sumtransfer does not exist'.$_REQUEST['sumtransfer'];
+	echo json_encode($arr);
+	die();
+}
+
+try{
+	$notes = $_REQUEST['notes'];
+	$iter = json_decode($notes);
+	if($iter == null || sizeof($iter)==0) {
+		header('Content-type: application/json');
+		$arr = array();
+		$arr['status'] = 'Failed';
+		$arr['message'] = 'No Notes given';
+		echo json_encode($arr);
+		die();
+	}
+}
+catch(Exception $e) { 
+	header('Content-type: application/json');
+	$arr = array();
+	$arr['status'] = 'Failed';
+	$arr['message'] = 'The notes are not received correctly';
 	echo json_encode($arr);
 	die();
 }
@@ -41,68 +61,48 @@ if (mysqli_connect_errno())
   {
   echo "Failed to connect to MySQL: " . mysqli_connect_error();
   }
-
-
-foreach($iter as $code)
-{
-$sql = "SELECT * from virtual_cash where code = '$code'" ;
-
+$querycodes = "'$iter[0]'";
+for ($i=1; $i <sizeof($iter) ; $i++) { 
+	$querycodes = $querycodes . ",'$iter[$i]'";
+}
+$sql = "SELECT sum(amount) from virtual_cash where code in ($querycodes) and isvalid = 1" ;
 if(!($result = mysqli_query($conn,$sql) ) )
 {
-	echo("Error description:1 " . mysqli_error($conn));
+	echo("Error description:0 " . mysqli_error($conn));
 	die() ;
 }
+if(mysqli_num_rows($result) == 1) {
+	$calculatedsum = (int)mysqli_fetch_assoc($result)['sum(amount)'];
 
-$rowcount = mysqli_num_rows($result) ;
-if( $rowcount == 0 ) { 
+} else {
+	echo("Error description:-1 " . mysqli_error($conn));
+	die() ;
+}
+if($calculatedsum != $sumtransfer || $sumtransfer<=0) {
 	header('Content-type: application/json');
 	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'Invalid Note';
+	$arr['status'] = 'Failed';
+	$arr['message'] = 'Failed due to sum transfer';
 	echo json_encode($arr);
 	die();
-	mysqli_free_result($result) ;
-}
-$inf = mysqli_fetch_assoc($result) ;
-$vid = $inf["vcid"] ;
-if( $inf["isvalid"] == 0 ) {
-header('Content-type: application/json');
-	$arr = array();
-	$arr[] = -1;
-	$arr[] = 'This note has been used';
-	echo json_encode($arr);
-	die();
-	mysqli_free_result($result) ;
 }
 
-
-
-$sql = "UPDATE cash_holder set uid = '$uid' where vcid = '$vid'" ;
+$sql = "UPDATE cash_holder ch inner join virtual_cash vc on ch.vcid=vc.vcid set uid = '$uid' where code in ($querycodes) and isvalid=1" ;
 
 if(!($result = mysqli_query($conn,$sql) ) )
 {
-	echo("Error description:1 " . mysqli_error($conn));
+	echo("Error description:10 " . mysqli_error($conn));
 	die() ;
-}
-
-
-
-$sql = "UPDATE virtual_cash set isvalid = 0 where vcid = '$vid'" ;
-
-if(!($result = mysqli_query($conn,$sql) ) )
-{
-	echo("Error description:1 " . mysqli_error($conn));
-	die() ;
-}
-
-
 }
 
 
 mysqli_close($conn);
 header('Content-type: application/json');
-
-
+	$arr = array();
+	$arr['status'] = 'Done';
+	$arr['message'] = 'Received Rs.'.$sumtransfer;
+	echo json_encode($arr);
+	die();
 
 
 
