@@ -2,7 +2,12 @@
 
 //This is used for user to convert his virtual money to physical money
 require('dbConnect.php') ;
-
+session_start();
+if(!(isset($_SESSION['i_am_admin']) && $_SESSION['i_am_admin']))
+{
+	echo "NOT ADMIN";
+	die();
+}
 $uid = 0 ;
 
 if( isset($_REQUEST['uid']) && !empty($_REQUEST['uid'])) {

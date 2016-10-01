@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 //This is for USER's LOGIN
 require('dbConnect.php') ;
 
@@ -15,7 +15,7 @@ else {
 	$arr = array();
 	$arr['status'] = 'Error';
 	$arr['message'] = 'Missing parameter in the request : email';
-	echo json_encode($arr);
+	header('Location: log.php?msg='.$arr['message']);//echo json_encode($arr);
 	die();
 }
 
@@ -28,7 +28,7 @@ else {
 	$arr = array();
 	$arr['status'] = 'Error';
 	$arr['message'] = 'Missing parameter in the request : pwd';
-	echo json_encode($arr);
+	header('Location: log.php?msg='.$arr['message']);//echo json_encode($arr);
 	die();
 }
 
@@ -52,7 +52,7 @@ if( $rowcount== 0 ){
 	$arr = array();
 	$arr['status'] = 'Error';
 	$arr['message'] = 'No such user';
-	echo json_encode($arr);
+	header('Location: log.php?msg='.$arr['message']);
 	die();
 	mysqli_free_result($result) ;
 } 
@@ -60,6 +60,9 @@ if( $rowcount== 0 ){
 $inf = mysqli_fetch_assoc($result) ;
 $uid = $inf['uid'];
 $name = $inf['name'];
+if($inf['type']==1) {
+	$_SESSION['i_am_admin'] = true;
+} else $_SESSION['i_am_admin'] = false;
 $key = sha1(base64_encode(openssl_random_pseudo_bytes(100))) ;
 
 $sql = "UPDATE user_info set mykey = '$key' where uid = '$uid'" ;
@@ -70,16 +73,7 @@ else echo("Error description:2 " . mysqli_error($conn));
 //mysqli_free_result($res) ;
 
 mysqli_close($conn);
-header('Content-type: application/json');
-
-$finresult = array() ;
-$finresult['status'] = 'Login' ;
-$finresult['uid'] = $uid ;
-$finresult['key'] = $key ;
-$finresult['email'] = $email ;
-$finresult['name'] = $name ;
-echo json_encode($finresult);
-
+header('Location: paywith.html')
 
 
 

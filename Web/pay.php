@@ -2,6 +2,12 @@
 
 //This is used for a user to convert his physical money to virtual money
 require('dbConnect.php') ;
+session_start();
+if(!(isset($_SESSION['i_am_admin']) && $_SESSION['i_am_admin']))
+{
+	echo "NOT ADMIN";
+	die();
+}
 
 $uid = 0 ;
 $amnt = 0 ;
@@ -86,6 +92,12 @@ while( $amnt > 0 )
 
 
 mysqli_close($conn);
+header('Content-type: application/json');
+$arr = array();
+$arr[] = 0;
+$arr[] = 'Done';
+echo json_encode($arr);
+die();
 ?>
 
 
