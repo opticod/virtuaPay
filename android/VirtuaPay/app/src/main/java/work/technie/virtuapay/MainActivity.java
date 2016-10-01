@@ -9,8 +9,11 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import work.technie.virtuapay.utils.Profile;
 
 public class MainActivity extends AppCompatActivity {
     private TextView tv_account_balance;
@@ -30,20 +33,21 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void payOther(View b) {
+        final EditText editText = new EditText(MainActivity.this);
+        editText.setHint("Enter Amount(Multiple of 10)");
         new AlertDialog.Builder(MainActivity.this)
                 .setTitle("Enter amount")
-                .setView(android.R.id.text1)
+                .setView(editText)
                 .setNegativeButton("Cancel",null)
                 .setPositiveButton("Pay", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
                         Intent intent = new Intent(MainActivity.this,ClientPay.class);
-                        String amt = ((TextView)MainActivity.this.findViewById(android.R.id.text1))
-                                .getText().toString().trim();
+                        String amt = editText.getText().toString().trim();
                         try {
                             int amount = Integer.parseInt(amt);
                             if(amount%10 !=0 )
-                                new RuntimeException("Div by 10 required");
+                                throw new RuntimeException("Div by 10 required");
                             intent.putExtra(ClientPay.INTENT_DATA_AMOUNT_KEY, amount);
                             startActivity(intent);
                         }catch (Exception e) {
@@ -53,7 +57,6 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 })
-                .setPositiveButton("Ok",null)
                 .show();
 
     }
@@ -68,7 +71,7 @@ public class MainActivity extends AppCompatActivity {
      * Fill up field for frontend
      */
     private void fillFields() {
-        tv_account_balance.setText("Rs. 200");
+        tv_account_balance.setText("None");
     }
 
     @Override
@@ -84,6 +87,12 @@ public class MainActivity extends AppCompatActivity {
             case R.id.action_sync:
 
 
+                return true;
+            case R.id.action_logout:
+                Profile.logout(this);
+                Intent intent = new Intent(this,LoginActivity.class);
+                startActivity(intent);
+                finish();
                 return true;
             default:
                 return super.onOptionsItemSelected(item);

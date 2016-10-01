@@ -6,7 +6,7 @@ import java.util.ArrayList;
  * Created by scopeinfinity on 30/9/16.
  */
 
-public interface ManagerPaymentInterface {
+public interface ManagerPaymentInterface{
     /**
      * Validate all notes
      * @param sender

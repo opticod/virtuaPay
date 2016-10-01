@@ -43,6 +43,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import work.technie.virtuapay.utils.Profile;
+
 import static android.Manifest.permission.READ_CONTACTS;
 
 /**
@@ -105,6 +107,20 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 LoginActivity.this.startActivity(intent);
             }
         });
+
+        checkAutoLogin();
+    }
+
+    private void checkAutoLogin() {
+        Profile profile = Profile.getInstance(this);
+        if(profile==null)
+            return;
+        if(!profile.checkOnline())
+            return;
+        Intent intent = new Intent(LoginActivity.this, MainActivity.class);
+        intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        LoginActivity.this.startActivity(intent);
+        finish();
     }
 
     private void populateAutoComplete() {
@@ -315,13 +331,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
      */
     public class UserLoginTask extends AsyncTask<Void, Void, Boolean> {
 
-        private static final String mPREFERENCES = "mPrefs";
         private final String mEmail;
         private final String mPassword;
-        HttpURLConnection urlConnection = null;
-        BufferedReader reader = null;
-        String resultJsonStr = null;
-        private SharedPreferences sharedpreferences;
+        private HttpURLConnection urlConnection = null;
+        private BufferedReader reader = null;
+        private String resultJsonStr = null;
+        private String lastErrorMessage = null;
 
         UserLoginTask(String email, String password) {
             mEmail = email;
@@ -336,22 +351,28 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 String result = jsonObject.getString("status");
                 final String UID = "uid";
                 final String KEY = "key";
-                String uid = jsonObject.getString(UID);
-                String key = jsonObject.getString(KEY);
+                final String EMAIL = "email";
+                final String NAME = "name";
 
                 if (result.equals("Login")) {
-                    sharedpreferences = getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
-                    SharedPreferences.Editor editor = sharedpreferences.edit();
-                    editor.putString(UID, uid);
-                    editor.putString(KEY, key);
-                    editor.apply();
+                    int uid = jsonObject.getInt(UID);
+                    String key = jsonObject.getString(KEY);
+                    String email = jsonObject.getString(EMAIL);
+                    String name = jsonObject.getString(NAME);
+                    Profile profile = new Profile(uid,email,name,key);
+                    profile.save(LoginActivity.this);
 
                     return true;
+                } else {
+                    lastErrorMessage = "Invalid Credentials";
+                    lastErrorMessage = jsonObject.getString("message");
                 }
+
                 return false;
             } catch (JSONException e) {
                 Log.e(LOG_TAG, e.getMessage(), e);
                 e.printStackTrace();
+                lastErrorMessage = "Error in Login "+e;
             }
             return false;
         }
@@ -422,8 +443,12 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
                 Intent intent = new Intent(LoginActivity.this, MainActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 LoginActivity.this.startActivity(intent);
+                finish();
             } else {
-                mPasswordView.setError(getString(R.string.error_incorrect_password));
+                if(lastErrorMessage == null)
+                    mPasswordView.setError("Login Failed");
+                else
+                    mPasswordView.setError(lastErrorMessage);
                 mPasswordView.requestFocus();
             }
         }

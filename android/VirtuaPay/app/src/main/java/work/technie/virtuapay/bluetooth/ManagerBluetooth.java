@@ -2,6 +2,7 @@ package work.technie.virtuapay.bluetooth;
 
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
+import android.content.Context;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -20,9 +21,11 @@ public class ManagerBluetooth extends Thread {
     private BluetoothServerSocket mmServerSocket;
     private BluetoothCommon common;
     private ManagerPaymentInterface paymentPortal;
+    private Context context;
 
-    public ManagerBluetooth(ManagerPaymentInterface paymentPortal) {
+    public ManagerBluetooth(Context context, ManagerPaymentInterface paymentPortal) {
         this.paymentPortal = paymentPortal;
+        this.context = context;
     }
 
     public boolean init(BluetoothCommon common) {
@@ -98,7 +101,7 @@ public class ManagerBluetooth extends Thread {
     private Message acceptMessage(Message message) {
         Message reply = null;
         String mineName = "Nobody";
-        Profile profile = Profile.getInstance();
+        Profile profile = Profile.getInstance(context);
         if(profile!=null)
             mineName = profile.getName();
         ArrayList<Note> invalids = paymentPortal.validate(message.getSender(), message.getList());
