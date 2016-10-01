@@ -2,6 +2,7 @@ package work.technie.virtuapay.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import work.technie.virtuapay.MainActivity;
 
@@ -33,6 +34,7 @@ public class Profile {
         this.name = name;
         this.email = email;
         this.key = key;
+        Log.i("***************", "Profile: "+name);
     }
 
     /**

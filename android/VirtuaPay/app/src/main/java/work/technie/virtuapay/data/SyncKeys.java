@@ -1,5 +1,6 @@
 package work.technie.virtuapay.data;
 
+import android.app.Activity;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -19,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 
+import work.technie.virtuapay.utils.MainActivityInterface;
+
 /**
  * Created by anupam on 1/10/16.
  */
@@ -27,18 +30,31 @@ public class SyncKeys extends AsyncTask<String, Void, Void> {
 
     private static final String mPREFERENCES = "mPrefs";
     public final String LOG_TAG = SyncKeys.class.getSimpleName();
-    private final String mEmail;
-    private final String mPassword;
-    HttpURLConnection urlConnection = null;
-    BufferedReader reader = null;
-    String resultJsonStr = null;
+    private final String uid;
+    private final String key;
+    private HttpURLConnection urlConnection = null;
+    private BufferedReader reader = null;
+    private String resultJsonStr = null;
     private SharedPreferences sharedpreferences;
     private Context mContext;
+    private MainActivityInterface intf;
 
-    SyncKeys(Context context, String email, String password) {
+    public SyncKeys(Context context, String uid, String key,MainActivityInterface intf) {
         mContext = context;
-        mEmail = email;
-        mPassword = password;
+        this.uid = uid;
+        this.key = key;
+        this.intf = intf;
+    }
+
+    @Override
+    protected void onPostExecute(Void aVoid) {
+        super.onPostExecute(aVoid);
+        Db db = new Db(mContext);
+        db.open();
+        int amount = db.countMoney();
+        db.close();
+        if(intf!=null)
+            intf.callbackUpdateAmount(amount);
     }
 
     private boolean saveDataFromJson(String resultJsonStr)
@@ -46,10 +62,21 @@ public class SyncKeys extends AsyncTask<String, Void, Void> {
 
         try {
             JSONObject jsonObject = new JSONObject(resultJsonStr);
+            if(!jsonObject.getString("status").equals("success")) {
+                Log.e("Log**********", "saveDataFromJson: "+ jsonObject.getString("message"));
+                if(jsonObject.getString("message").equals("Invalid User")) {
+                    intf.logout();
+                }
+                return false;
+            }
             String amount = jsonObject.getString("amount");
             JSONArray validNotes = jsonObject.getJSONArray("validnotes");
 
             Vector<ContentValues> cVVector = new Vector<>(validNotes.length());
+            for (int i = 0; i < validNotes.length(); i++) {
+                if(validNotes.get(i).toString() instanceof String)
+                    continue;
+            }
 
             for (int i = 0; i < validNotes.length(); i++) {
 
@@ -63,15 +90,17 @@ public class SyncKeys extends AsyncTask<String, Void, Void> {
                 InfoValues.put(Contract.Keys.VALID, "1");
                 cVVector.add(InfoValues);
             }
+
+            Db db = new Db(mContext);
+            db.open();
+            db.truncate();
             // add to database
             if (cVVector.size() > 0) {
                 ContentValues[] cvArray = new ContentValues[cVVector.size()];
                 cVVector.toArray(cvArray);
-                Db db = new Db(mContext);
-                db.open();
                 db.bulkInsert(cvArray);
-                db.close();
             }
+            db.close();
             return false;
         } catch (JSONException e) {
             Log.e(LOG_TAG, e.getMessage(), e);
@@ -87,15 +116,8 @@ public class SyncKeys extends AsyncTask<String, Void, Void> {
         try {
             final String BASE_URL = "http://172.16.8.208/web/sync.php?";
             final String UID_PARAM = "uid";
-            final String KEY_PARAM = "key";
+            final String KEY_PARAM = "mykey";
 
-            SharedPreferences preferences = mContext.getSharedPreferences(mPREFERENCES, Context.MODE_PRIVATE);
-
-            final String UID = "uid";
-            final String KEY = "key";
-
-            String uid = preferences.getString(UID, "-1");
-            String key = preferences.getString(KEY, "-1");
 
             Uri builtUri = Uri.parse(BASE_URL).buildUpon()
                     .appendQueryParameter(UID_PARAM, uid)

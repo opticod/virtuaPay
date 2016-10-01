@@ -3,6 +3,7 @@ package work.technie.virtuapay.bluetooth;
 import android.bluetooth.BluetoothServerSocket;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.util.Log;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -104,15 +105,13 @@ public class ManagerBluetooth extends Thread {
         Profile profile = Profile.getInstance(context);
         if(profile!=null)
             mineName = profile.getName();
-        ArrayList<Note> invalids = paymentPortal.validate(message.getSender(), message.getList());
-        if(invalids.size() == 0) {
-            if(paymentPortal.acceptNotes(message.getSender(), message.getList())) {
-                reply = new Message(mineName,Message.MESSAGE_REPLY_SUCCESS, null);
-            }
-            else reply = new Message(mineName,Message.MESSAGE_REPLY_FAIL,null);
+        if(paymentPortal.acceptNotes(message.getSender(), message.getList())) {
+            Log.i("*****", "acceptMessage: Sender "+message.getSender());
+            Log.i("*****", "acceptMessage: isListNULL "+(message.getList()==null));
+
+            reply = new Message(mineName,Message.MESSAGE_REPLY_SUCCESS, null);
         }
-        else
-            reply = new Message(mineName,Message.MESSAGE_REPLY_FAIL, invalids);
+        else reply = new Message(mineName,Message.MESSAGE_REPLY_FAIL,null);
         return reply;
     }
 }

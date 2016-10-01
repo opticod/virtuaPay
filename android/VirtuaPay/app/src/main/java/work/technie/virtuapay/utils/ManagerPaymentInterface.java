@@ -7,13 +7,6 @@ import java.util.ArrayList;
  */
 
 public interface ManagerPaymentInterface{
-    /**
-     * Validate all notes
-     * @param sender
-     * @param notes
-     * @return areAllValid
-     */
-    ArrayList<Note> validate(String sender, ArrayList<Note> notes);
 
     /**
      * Accepts all notes

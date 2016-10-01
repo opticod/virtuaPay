@@ -77,15 +77,15 @@ public class ClientPay extends AppCompatActivity implements ClientPaymentInterfa
         if(isBluetoothEnabled == null) {
             flashMessage("Enabling Bluetooth");
         }
-        cashManager = CashManager.getInstance(this);
+        cashManager = new CashManager(this);
     }
 
     private void showProgress(boolean toshow){
         int vis1 = View.VISIBLE, vis2 = View.GONE;
         if(!toshow) {vis2=View.VISIBLE ; vis1 = View.GONE;}
 
-        ((ProgressBar)findViewById(R.id.progress)).setVisibility(vis1);
-        ((ProgressBar)findViewById(R.id.progress)).setVisibility(vis2);
+        (findViewById(R.id.progress)).setVisibility(vis1);
+        (findViewById(R.id.no_progress)).setVisibility(vis2);
 
     }
 
@@ -183,6 +183,28 @@ public class ClientPay extends AppCompatActivity implements ClientPaymentInterfa
             }
         });
         ArrayList<Note> list = cashManager.getNotes(amount);
+        if(list == null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showProgress(false);
+                }
+            });
+            showAlert("Error in Generating Cash",true);
+            return "Error in Generating Cash";
+        }
+
+        if(cashManager.getLastError()!=null) {
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    showProgress(false);
+                }
+            });
+            showAlert(cashManager.getLastError(),true);
+            return cashManager.getLastError();
+        }
+
         ArrayList<Note> falseNote = clientBluetooth.sendMoney(bd,list);
 
         runOnUiThread(new Runnable() {
@@ -200,6 +222,7 @@ public class ClientPay extends AppCompatActivity implements ClientPaymentInterfa
             showAlert("False Notes Found! Transaction Cancelled",false);
             return "False Notes Found! Transaction Cancelled";
         }
+        cashManager.removeCash(list);
         showAlert("Transaction Successful",true);
         return "Transaction Successful";
 

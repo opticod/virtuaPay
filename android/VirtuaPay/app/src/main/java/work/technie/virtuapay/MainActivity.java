@@ -13,9 +13,11 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import work.technie.virtuapay.data.SyncKeys;
+import work.technie.virtuapay.utils.MainActivityInterface;
 import work.technie.virtuapay.utils.Profile;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements MainActivityInterface {
     private TextView tv_account_balance;
 
     @Override
@@ -24,9 +26,14 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_manager);
 
         tv_account_balance = (TextView) findViewById(R.id.account_balance);
-
+        sync();
     }
 
+    private void sync() {
+        Profile profile = Profile.getInstance(this);
+        ((TextView)findViewById(R.id.manager_welcome_msg)).setText("Welcome "+profile.getName()+"!!");
+        new SyncKeys(this,""+profile.getUid(),profile.getKey(),this).execute();
+    }
     public void acceptPay(View b) {
         Intent intent = new Intent(this,ManagerAccept.class);
         startActivity(intent);
@@ -64,15 +71,9 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        fillFields();
+        sync();
     }
 
-    /**
-     * Fill up field for frontend
-     */
-    private void fillFields() {
-        tv_account_balance.setText("None");
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -85,8 +86,7 @@ public class MainActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.action_sync:
-
-
+                sync();
                 return true;
             case R.id.action_logout:
                 Profile.logout(this);
@@ -98,5 +98,25 @@ public class MainActivity extends AppCompatActivity {
                 return super.onOptionsItemSelected(item);
         }
     }
+
+    @Override
+    public void callbackUpdateAmount(int amount) {
+        tv_account_balance.setText("Rs."+amount);
+    }
+
+    @Override
+    public void logout() {
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(MainActivity.this,"Login Session Expired!\nLogin Again",Toast.LENGTH_LONG).show();
+                finish();
+                Profile.logout(MainActivity.this);
+                Intent intent = new Intent(MainActivity.this,LoginActivity.class);
+                startActivity(intent);
+            }
+        });
+    }
+
 
 }

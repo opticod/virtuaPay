@@ -63,7 +63,7 @@
                         android:textSize="@dimen/activity_highlight2_size"
                         android:id="@+id/account_balance"
                         android:textStyle="italic"
-                        android:text="Rs 100"/>
+                        android:text="None"/>
                 </LinearLayout>
 
 
