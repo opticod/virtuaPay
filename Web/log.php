@@ -77,7 +77,7 @@ input:focus { box-shadow: inset 0 -5px 45px rgba(100,100,100,0.4), 0 1px 1px rgb
 	if(isset($_REQUEST['msg']))
 		echo '<div style=\'color:red\'>'.$_REQUEST['msg'].'</div>	';
 	?>
-    <form method="post" action="login.php">
+    <form method="post" action="loginadmin.php">
     	<input type="email" name="email" placeholder="Email" required="required" />
         <input type="password" name="pwd" placeholder="Password" required="required" />
         <button type="submit" class="btn btn-primary btn-block btn-large"> Let me in.</button>

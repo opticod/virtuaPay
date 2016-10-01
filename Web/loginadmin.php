@@ -73,14 +73,7 @@ else echo("Error description:2 " . mysqli_error($conn));
 //mysqli_free_result($res) ;
 
 mysqli_close($conn);
-header('Content-type: application/json');
+header('Location: paywith.html')
 
-$finresult = array() ;
-$finresult['status'] = 'Login' ;
-$finresult['uid'] = $uid ;
-$finresult['key'] = $key ;
-$finresult['email'] = $email ;
-$finresult['name'] = $name ;
-echo json_encode($finresult);
 
 ?>
