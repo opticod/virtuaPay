@@ -308,7 +308,7 @@ public class ManagerAccept extends AppCompatActivity implements ManagerPaymentIn
 
             boolean result = false;
             try {
-                final String BASE_URL = "http://172.16.8.208/web/shop.php?";
+                final String BASE_URL = LoginActivity.SERVER_URL+"web/shop.php?";
                 final String UID_PARAM = "uid";
                 final String ST_PARAM = "sumtransfer";
                 final String NOTES_PARAM = "notes";

@@ -20,6 +20,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Vector;
 
+import work.technie.virtuapay.LoginActivity;
 import work.technie.virtuapay.utils.MainActivityInterface;
 
 /**
@@ -114,7 +115,7 @@ public class SyncKeys extends AsyncTask<String, Void, Void> {
 
         boolean result = false;
         try {
-            final String BASE_URL = "http://172.16.8.208/web/sync.php?";
+            final String BASE_URL = LoginActivity.SERVER_URL+"web/sync.php?";
             final String UID_PARAM = "uid";
             final String KEY_PARAM = "mykey";
 

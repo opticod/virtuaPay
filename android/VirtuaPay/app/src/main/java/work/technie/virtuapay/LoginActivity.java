@@ -51,7 +51,7 @@ import static android.Manifest.permission.READ_CONTACTS;
  * A login screen that offers login via email/password.
  */
 public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<Cursor> {
-
+    public static final String SERVER_URL = "http://192.168.0.102/";
     public static final String mPREFERENCES = "mPrefs";
     /**
      * Id to identity READ_CONTACTS permission request.
@@ -382,7 +382,7 @@ public class LoginActivity extends AppCompatActivity implements LoaderCallbacks<
 
             boolean result = false;
             try {
-                final String BASE_URL = "http://172.16.8.208/web/login.php?";
+                final String BASE_URL = SERVER_URL+"web/login.php?";
                 final String EMAIL_PARAM = "email";
                 final String PASSWORD_PARAM = "pwd";
 

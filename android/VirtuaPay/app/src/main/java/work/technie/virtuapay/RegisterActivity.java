@@ -395,7 +395,7 @@ public class RegisterActivity extends AppCompatActivity implements LoaderCallbac
 
             boolean result = false;
             try {
-                final String BASE_URL = "http://172.16.8.208/web/user.php?";
+                final String BASE_URL = LoginActivity.SERVER_URL+"web/user.php?";
                 final String EMAIL_PARAM = "email";
                 final String PASSWORD_PARAM = "pwd";
                 final String NAME_PARAM = "name";
